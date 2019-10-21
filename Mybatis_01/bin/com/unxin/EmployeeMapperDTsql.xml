@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.unxin.EmployeeMapperDTsql">
+		<!-- if
+				choose(when otherwise)
+				trim(where set)
+				foreach
+		 -->
+
+		<!-- public  List<user_compensatory_summary> getByapplyid(); -->
+
+		<select id="getByapplyid" resultType="com.youxinjr.user_compensatory_summary">
+		select id,applyid,fund_channel from user_compensatory_summary 
+	<!-- // 查询的时候如果某些条件不带可能会有拼装问题。
+			// 1，给where后面加上1=1 以后条件都用and XXX
+			// 2，mybatis使用where标签来将所有的查询条件包括在内。mybatis就会将where拼装sql中多出来的and或者or去掉
+			// where只会去掉第一个多出来的and -->
+<where>
+		<if test="id !=null">
+			and id =#{id} 
+		</if>
+		<if test="applyid !=null">
+			and applyid =#{applyid}
+		</if>
+		<if test="fund_channel !=null">
+			and fund_channel=#{fund_channel}
+		</if>
+</where>		
+		</select>
+
+<select id="getByapplyidtrim" resultType="com.youxinjr.user_compensatory_summary">
+		select id,applyid,fund_channel from user_compensatory_summary 
+		
+		<!--
+				后面多出的and或者or where不能解决 可以使用trim
+				 prefix="" :前缀trim标签体中是整个字符串拼串后的结果
+				 					prefix：给拼串后的整个字符串加一个前缀
+				prefixOverrides="" ：前缀覆盖，去掉整个字符串前面多余的字符
+				suffix="" ：后缀
+									suffix：给拼串后的字符加一个后缀
+				suffixOverrides=""：后缀覆盖，去掉真个字符串后面多余的字符
+		
+		 -->
+		
+<trim prefix="where"  suffixOverrides="and">
+		<if test="id !=null">
+			 id =#{id} and
+		</if>
+		<if test="applyid !=null">
+			 applyid =#{applyid} and
+		</if>
+		<if test="fund_channel !=null">
+			 fund_channel=#{fund_channel}
+		</if>
+</trim>	
+		</select>
+
+	<update id="getByapplyidupdate" >
+		update user_compensatory_summary
+		<set>
+			<if test="id !=null">
+				id=#{id},
+			</if>
+			<if test="applyid !=null">
+				applyid=#{applyid},
+			</if>
+			<if test="fund_channel !=null">
+				fund_channel = #{fund_channel}
+			</if>
+		</set>
+		<where>
+			id=#{id}
+		</where>
+	</update>
+		
+	<!-- public List<user_compensatory_summary>getapplyidIn(user_compensatory_summary user_compensatory_summary); -->	
+		<select id="getapplyidIn" resultType="com.youxinjr.user_compensatory_summary">
+			 select * from user_compensatory_summary 
+			 <!-- 
+			 		collection:指定要遍历的集合
+			 			list类型的参数会特殊处理封装在map中，map的key就叫做list
+			 			item：将当前遍历出的元素赋值给指定的变量
+			 			separator：每个元素之间的分隔符
+			 			open:遍历出所有结果拼接一个开始的字符
+			 			close:遍历出所有结果拼接一个结束的字符
+			 			index:索引，遍历list的时候index是索引，item就是当前值
+			 								遍历map的时候
+			 			#{变量名}就能取出变量的值也就是当前遍历出的元素
+
+			  -->
+			<foreach collection="applyids" item="applyid" separator="," open="where applyid in(" close=")" >
+					#{applyid}
+			</foreach>
+	</select>
+	
+	
+	<!-- 批量插入 -->	
+	<!-- public void  getinster(@Param("user")List<user_compensatory_summary>  user);
+	由于user_compensatory_summary表限制其他字段所有没有通，定义没问题。
+	 -->
+	<insert id="getinster">
+			insert into  user_compensatory_summary(id,applyid,fund_channel)
+			values
+			<foreach collection="user" item="emp"  separator="," >
+				(#{emp.id},#{emp.applyid},#{emp.fund_channel})
+			</foreach>
+	
+
+	</insert>
+		
+		
+		
+		
+		
+
+</mapper>

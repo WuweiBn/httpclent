@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.unxin.roboteMapper">
+
+	<select id="getByrobot" resultType="com.youxinjr.robote">
+		select * from ivr_task_batch where id = #{id}
+	</select>
+	
+	<resultMap type="com.youxinjr.robote" id="getrobot_id">
+		
+		<!-- collection定义集合类型的属性封装规则 
+				ofType 指定封装里面元素的类型
+		-->
+			<!-- <id column="id" property="id"/> -->
+			<result column="rid" property="robot_id"/>
+		<collection property="employs" ofType="com.youxinjr.Employ">
+			<result column="cod" property="code"/>
+			<result column="remark" property="remark"/>
+		</collection>
+	</resultMap>
+	
+	<select id="getByrobotplus"  resultMap="getrobot_id">
+	select b.remark remark , b.code cod ,a.robot_id rid from ivr_task_batch a LEFT JOIN ivr_bestcode_dict b on a.robot_id=b.robot_id WHERE a.robot_id = #{id}
+	</select>
+	
+	
+
+</mapper>

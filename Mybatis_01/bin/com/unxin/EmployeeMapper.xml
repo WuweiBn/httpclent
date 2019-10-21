@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.unxin.EmployeeMapper">
+	<!-- namespace:名称空间,指定为接口的全类名 id:唯一标识 resultType：返回值类型 #{id}：从传递的参数中取出id值 
+		public Employ getEmpById(Integer id); -->
+	<select id="getEmpById" resultType="com.youxinjr.Employ">
+		select * from ivr_bestcode_dict where id = #{id}
+	</select>
+<!-- public void addEmp(Employ employ); -->
+	<!--parameterType ,可以省略 
+	mysql	支持自增主键，自增主键值得获取，mybatis也是利用statement.getGenreatedKeys();
+	useGenreatedKeys = "true":使用自增主键获取主键策略
+	KeyProperty:指定对应的主键属性，也就是mybatis 获取到主键以后，将这个值封装给javaBean的哪个属性
+	-->
+	<insert id="addEmp" parameterType="com.youxinjr.Employ" useGeneratedKeys="true" keyProperty="id">
+		insert into  ivr_bestcode_dict (id,robot_id,code,state,remark,additional_desc) 
+		values(#{id},#{robot_id},#{code},#{state},#{remark},#{additional_desc})
+	</insert>
+
+	<update id="updateEmp" >
+		update ivr_bestcode_dict  set robot_id=#{robot_id},code=#{code},state=#{state},remark=#{remark},additional_desc=#{additional_desc}
+		where id = #{id}
+	</update>
+
+	<delete id="deleteEmpById">
+	delete from ivr_bestcode_dict where id = #{id}	
+	</delete>
+	
+	<!-- public void getEmpByIdandCod(@Param("id")Integer id,@Param("code")String code);
+	多条件查询可以用@Param("id")命名
+	 -->
+	<select id="getEmpByIdandCod" resultType="com.youxinjr.Employ">
+	select * from ivr_bestcode_dict where id = #{id}  and code = #{code}
+	</select>
+	
+	<!-- public Employ getEmpbylikecode(String code); 
+		concat：防止sql注入，concat('%',#{value},'%')  或者 ‘%￥{value}%’ 
+	 -->
+	<select id="getEmpbylikecode" parameterType="String"  resultType="com.youxinjr.Employ">
+		select * from ivr_bestcode_dict where code like    #{code} <!-- concat('%',#{value},'%') -->
+	</select>
+	
+	<!-- public Map<String, Employ> getBycodeReturnMap(String code); -->
+	<select id="getBycodeReturnMap" resultType="com.youxinjr.Employ">
+		select * from ivr_bestcode_dict where code like    #{code}
+	</select>
+	
+	
+	<!-- 自定义某个java Bean封装规则
+			type:自定义规则java类型（建议为封装java bean得全类名）
+			id: 唯一主键方便引用（自定义）
+	 -->
+	<resultMap type="com.youxinjr.Employ" id="getEmp">
+		<!-- 指定主键的封装规则 
+				id:指定哪一列   property：指定对应的java bean属性		
+		-->
+		<id column="id"  property="id"/>
+		<!-- 定义普通列 -->
+		<result column="code" property="code"/>
+		<!-- 其他不指定会自动封装 -->
+	</resultMap>
+	
+	<select id="getByid" resultMap="getEmp">
+		select * from ivr_bestcode_dict where id = #{id}
+	</select>
+	
+	<!-- 联合查询级联属性封装结果集 -->
+	<resultMap type="com.youxinjr.Employ"  id="getrobots">
+		<id column="id" property="id"/>
+		<result column="rid" property="robot_id"/>
+		<result column="cod" property="code"/>
+		<result column="remark" property="remark"/>
+		<result column="uid" property="ivr_task_batch.user_id"/>
+		<result column="cancel"  property="ivr_task_batch.is_cancel"/>
+		
+	</resultMap>
+	
+	<select id="getrobot" resultMap="getrobots">
+		select a.id id,a.robot_id rid,a.code cod,a.remark remark, b.user_id uid, b.is_cancel cancel from ivr_bestcode_dict a LEFT JOIN ivr_task_batch b on a.robot_id=b.robot_id WHERE a.robot_id = #{robot_id}
+	</select>
+	
+	<!--
+		使用 association 进行分布查询
+			select 表明当前属性是调用select指定得方法查出得结果
+			column 指定哪一列得值传入这个方法
+			 分布查询 可使用延迟加载，节约数据库 见setting。
+			 fetchType="lazy"表示延迟加载 ，eager：立即加载，默认为lazy
+	  -->
+	<resultMap type="com.youxinjr.Employ" id="getrobots1">
+		<id column="id" property="id"/>
+		<result column="robot_id" property="robot_id"/>
+		<result column="code" property="code"/>
+		<association property="ivr_task_batch" select="com.unxin.roboteMapper.getByrobot" column="id" fetchType="lazy"></association>
+	</resultMap>
+	
+	<select id="getroBot" resultMap="getrobots1">
+	 	select * from ivr_bestcode_dict where id = #{id}
+	</select>
+	
+	
+	
+	
+	
+	
+</mapper>

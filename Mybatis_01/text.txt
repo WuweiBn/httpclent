@@ -1,0 +1,11 @@
+一、区别：
+	#{}:以预编译得形式，将参数设置到Sql语句种；
+	${}:取出的值直接拼装在sql语句种；会有安全问题；
+	大多情况下，我们取参数值都应该用#{};
+		例子： select * from ${year}_salary where xxxx  order by ${f_name} ${order}	
+		
+二、jdbcTypeoracle（报错）: 
+	我们数据为null时，有时候mybatis不能识别，比如oracle（报错）；
+	方法：1、#{email,jdbcType=OTHER};  2、jdbcTypeForNull=Null     <setting name = "jdbcTypeForNull" value = "NULL"/>
+	
+	
